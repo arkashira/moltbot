@@ -1,36 +1,52 @@
 import json
 from dataclasses import dataclass
-from argparse import ArgumentParser
+from enum import Enum
+from typing import Dict
+
+class Channel(Enum):
+    WHATSAPP = "whatsapp"
+    TELEGRAM = "telegram"
 
 @dataclass
-class MoltbotConfig:
-    channel: str
-    device_id: str
+class User:
+    id: int
+    name: str
+    channel: Channel
 
 class Moltbot:
-    def __init__(self, config: MoltbotConfig):
-        self.config = config
+    def __init__(self):
+        self.users = {}
 
-    def install(self):
-        # Simulate installation
-        return f"Installed Moltbot on {self.config.device_id}"
+    def add_user(self, user: User):
+        self.users[user.id] = user
 
-    def interact(self, message: str):
-        # Simulate interaction
-        return f"Moltbot responded to {message} on {self.config.channel}"
+    def get_user(self, user_id: int) -> User:
+        return self.users.get(user_id)
 
-def parse_args():
-    parser = ArgumentParser()
-    parser.add_argument("--channel", help="Preferred channel (e.g. WhatsApp, Telegram)")
-    parser.add_argument("--device-id", help="Device ID")
-    return parser.parse_args()
+    def interact(self, user_id: int, message: str) -> str:
+        user = self.get_user(user_id)
+        if user:
+            # Simulate interaction with Moltbot via the user's preferred channel
+            return f"Hello, {user.name}! You said: {message}"
+        else:
+            return "User not found"
 
-def main():
-    args = parse_args()
-    config = MoltbotConfig(channel=args.channel, device_id=args.device_id)
-    moltbot = Moltbot(config)
-    print(moltbot.install())
-    print(moltbot.interact("Hello, Moltbot!"))
+    def to_json(self) -> str:
+        users_json = {user_id: {
+            "name": user.name,
+            "channel": user.channel.value
+        } for user_id, user in self.users.items()}
+        return json.dumps(users_json)
 
-if __name__ == "__main__":
-    main()
+    @classmethod
+    def from_json(cls, json_str: str) -> "Moltbot":
+        moltbot = cls()
+        users_json = json.loads(json_str)
+        for user_id, user_data in users_json.items():
+            user = User(
+                id=int(user_id),
+                name=user_data["name"],
+                channel=Channel(user_data["channel"])
+            )
+            moltbot.add_user(user)
+        return moltbot
