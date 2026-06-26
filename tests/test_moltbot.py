@@ -1,41 +1,34 @@
-import pytest
-from src.moltbot import Moltbot, User, Channel
+from moltbot import Moltbot, Channel
 
-def test_add_user():
+def test_install():
     moltbot = Moltbot()
-    user = User(id=1, name="John Doe", channel=Channel.WHATSAPP)
-    moltbot.add_user(user)
-    assert moltbot.get_user(1) == user
-
-def test_get_user():
-    moltbot = Moltbot()
-    user = User(id=1, name="John Doe", channel=Channel.WHATSAPP)
-    moltbot.add_user(user)
-    assert moltbot.get_user(1) == user
+    result = moltbot.install(1, "John Doe", Channel.WHATSAPP)
+    assert result == "User John Doe installed on whatsapp"
 
 def test_interact():
     moltbot = Moltbot()
-    user = User(id=1, name="John Doe", channel=Channel.WHATSAPP)
-    moltbot.add_user(user)
-    response = moltbot.interact(1, "Hello, Moltbot!")
-    assert response == "Hello, John Doe! You said: Hello, Moltbot!"
+    moltbot.install(1, "John Doe", Channel.WHATSAPP)
+    result = moltbot.interact(1, "Hello, Moltbot!")
+    assert result == "User John Doe received message on whatsapp: Hello, Moltbot!"
 
-def test_to_json():
+def test_setup():
     moltbot = Moltbot()
-    user = User(id=1, name="John Doe", channel=Channel.WHATSAPP)
-    moltbot.add_user(user)
-    json_str = moltbot.to_json()
-    assert json_str == '{"1": {"name": "John Doe", "channel": "whatsapp"}}'
-
-def test_from_json():
-    json_str = '{"1": {"name": "John Doe", "channel": "whatsapp"}}'
-    moltbot = Moltbot.from_json(json_str)
-    user = moltbot.get_user(1)
-    assert user.id == 1
-    assert user.name == "John Doe"
-    assert user.channel == Channel.WHATSAPP
+    moltbot.install(1, "John Doe", Channel.WHATSAPP)
+    result = moltbot.setup(1, Channel.TELEGRAM)
+    assert result == "User John Doe setup on telegram"
 
 def test_interact_user_not_found():
     moltbot = Moltbot()
-    response = moltbot.interact(1, "Hello, Moltbot!")
-    assert response == "User not found"
+    try:
+        moltbot.interact(1, "Hello, Moltbot!")
+        assert False, "Expected ValueError"
+    except ValueError as e:
+        assert str(e) == "User not found"
+
+def test_setup_user_not_found():
+    moltbot = Moltbot()
+    try:
+        moltbot.setup(1, Channel.TELEGRAM)
+        assert False, "Expected ValueError"
+    except ValueError as e:
+        assert str(e) == "User not found"

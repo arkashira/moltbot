@@ -1,9 +1,7 @@
-# Moltbot Onboarding and Setup
+# Moltbot
 
-This project simplifies the onboarding process for new Moltbot users.
+Moltbot is a simple onboarding and setup system for new users.
 
-## Installation and Setup
+## Installation
 
-1. Clone the repository
-2. Run `python -m pytest` to test the implementation
-3. Use the `moltbot` module to interact with Moltbot via your preferred channel
+To install Moltbot, run the following command:
